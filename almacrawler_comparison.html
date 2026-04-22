@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlmaCrawler – Comparativa Prodotti</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a14; font-family: 'Segoe UI', system-ui, sans-serif; color: #e0e0e0; padding: 32px 20px; min-height: 100vh; }
+  .header { border-left: 4px solid #e74c3c; padding-left: 16px; margin-bottom: 28px; }
+  .header-tag { font-size: 11px; letter-spacing: 0.15em; color: #e74c3c; text-transform: uppercase; margin-bottom: 6px; }
+  .header h1 { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+  .header p { margin-top: 6px; color: #6060a0; font-size: 13px; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn { padding: 10px 18px; border-radius: 6px; border: none; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: 0.03em; transition: all 0.2s; background: #1a1a2e; color: #6060a0; }
+  .tab-btn.active { color: #fff; }
+  .tab-btn.t-scissor.active { background:#e74c3c; box-shadow:0 0 14px #e74c3c55; }
+  .tab-btn.t-boom.active    { background:#2980b9; box-shadow:0 0 14px #2980b955; }
+  .tab-btn.t-bill.active    { background:#8e44ad; box-shadow:0 0 14px #8e44ad55; }
+  .tab-btn.t-aj.active      { background:#e67e22; box-shadow:0 0 14px #e67e2255; }
+  .tab-btn.t-mh.active      { background:#2c3e50; box-shadow:0 0 14px #2c3e5055; border: 1px solid #566573; }
+
+  .legend { display: flex; gap: 20px; margin-bottom: 18px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8080a0; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .table-wrapper { background: #0f0f1a; border-radius: 12px; border: 1px solid #2a2a3e; overflow-x: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: #1a1a2e; }
+  th { padding: 12px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #a0a0c0; white-space: nowrap; border-bottom: 1px solid #2a2a3e; }
+  th.label-col { text-align: left; }
+  th.data-col  { text-align: center; min-width: 145px; }
+  td { padding: 9px 14px; border-bottom: 1px solid #1e1e30; line-height: 1.4; }
+  td.label-cell { color: #7070a0; font-weight: 600; font-size: 12px; letter-spacing: 0.03em; white-space: nowrap; border-right: 1px solid #2a2a3e; }
+  td.data-cell  { text-align: center; color: #e0e0e0; }
+  td.green  { color: #2ecc71 !important; font-weight: 600; }
+  td.red    { color: #e74c3c !important; font-weight: 600; }
+  td.orange { color: #f39c12 !important; font-weight: 600; }
+  tr:nth-child(even) td { background: #13131f; }
+  tr:nth-child(odd)  td { background: #0f0f1a; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Sub-tabs for Billennium */
+  .sub-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .sub-tab-btn { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; font-size: 11px; letter-spacing: 0.04em; transition: all 0.2s; background: #15152a; color: #5050a0; border: 1px solid #2a2a4a; }
+  .sub-tab-btn.active { background: #8e44ad; color: #fff; border-color: #8e44ad; box-shadow: 0 0 10px #8e44ad44; }
+  .sub-section { display: none; }
+  .sub-section.active { display: block; }
+
+  /* Type badge */
+  .type-badge { display: inline-block; font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
+  .badge-tele { background: #1a3a5c; color: #5dade2; border: 1px solid #2980b9; }
+  .badge-arti { background: #3a1a5c; color: #bb8fce; border: 1px solid #8e44ad; }
+
+  .cards-title { font-size: 14px; font-weight: 700; color: #7070a0; letter-spacing: 0.1em; text-transform: uppercase; margin: 28px 0 14px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 12px; }
+  .card { background: #13131f; border-radius: 10px; padding: 16px; border: 1px solid #2a2a3e; border-top-width: 3px; }
+  .card-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+  .card-subtitle { font-size: 10px; color: #6060a0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .card-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin-bottom: 5px; }
+  .card-row .lbl { color: #50507a; }
+  .card-row .val { color: #c0c0e0; font-weight: 600; text-align: right; }
+  .card-row .val.green  { color: #2ecc71; }
+  .card-row .val.red    { color: #e74c3c; }
+  .card-row .val.orange { color: #f39c12; }
+
+  .adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 20px; }
+  .adv-card { background: #13131f; border-radius: 10px; padding: 16px; border-left: 3px solid #e67e22; }
+  .adv-card h4 { color: #e67e22; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .adv-card p  { color: #9090b0; font-size: 12px; line-height: 1.5; }
+  .adv-card.purple { border-left-color: #8e44ad; }
+  .adv-card.purple h4 { color: #9b59b6; }
+
+  .section-subtitle { font-size: 14px; font-weight: 700; color: #7070a0; letter-spacing: 0.1em; text-transform: uppercase; margin: 28px 0 14px; }
+
+  /* Divider between sub-sections */
+  .subsection-header { display: flex; align-items: center; gap: 14px; margin: 0 0 18px; }
+  .subsection-header h3 { font-size: 15px; font-weight: 800; color: #fff; white-space: nowrap; }
+  .subsection-header hr { flex: 1; border: none; border-top: 1px solid #2a2a3e; }
+
+  .footer { margin-top: 28px; font-size: 11px; color: #3a3a5a; text-align: center; }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 680px) {
+    body { padding: 16px 12px; }
+    .header h1 { font-size: 20px; }
+    .header p  { font-size: 11px; }
+
+    /* Tab buttons: scrollable row */
+    .tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+      gap: 6px;
+    }
+    .tabs::-webkit-scrollbar { height: 3px; }
+    .tabs::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
+    .tab-btn {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      font-size: 11px;
+    }
+
+    /* Sub-tabs: scrollable row */
+    .sub-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+    }
+    .sub-tab-btn { flex-shrink: 0; font-size: 10px; padding: 8px 12px; }
+
+    /* Tables: smaller font, sticky first column */
+    table { font-size: 11px; }
+    th { padding: 8px 10px; font-size: 10px; }
+    td { padding: 7px 10px; }
+    th.data-col { min-width: 110px; }
+    td.label-cell {
+      position: sticky;
+      left: 0;
+      background: #0f0f1a !important;
+      z-index: 1;
+      font-size: 11px;
+      min-width: 120px;
+      max-width: 140px;
+      white-space: normal;
+    }
+    tr:nth-child(even) td.label-cell { background: #13131f !important; }
+
+    /* Cards: single column on very small screens */
+    .cards-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .card { padding: 12px; }
+    .card-title { font-size: 13px; }
+    .card-row .lbl, .card-row .val { font-size: 11px; }
+
+    /* Advantage grid: single column */
+    .adv-grid { grid-template-columns: 1fr; gap: 10px; }
+    .adv-card { padding: 12px; }
+    .adv-card h4 { font-size: 12px; }
+    .adv-card p  { font-size: 11px; }
+
+    /* Legend: wrap tightly */
+    .legend { gap: 10px; }
+    .legend-item { font-size: 11px; }
+
+    /* Section headers */
+    .subsection-header h3 { font-size: 13px; }
+    .section-subtitle { font-size: 12px; margin: 20px 0 10px; }
+    .cards-title { font-size: 12px; margin: 20px 0 10px; }
+  }
+
+  @media (max-width: 400px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">AlmaCrawler · AlmacTech · Viadana (MN)</div>
+  <h1>Comparativa Prodotti</h1>
+  <p>Caratteristiche tecniche principali · BIBI Scissor · JIBBI Telescopici · BILLENNIUM SpiderBoom · AJ-LINE Articolati</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn t-scissor active" onclick="showTab('scissor',this)">✦ BIBI – Scissor Lift</button>
+  <button class="tab-btn t-boom"           onclick="showTab('boom',this)">✦ JIBBI – Telescopici</button>
+  <button class="tab-btn t-bill"           onclick="showTab('bill',this)">✦ BILLENNIUM – SpiderBoom</button>
+  <button class="tab-btn t-aj"             onclick="showTab('aj',this)">✦ AJ-LINE – Articolati</button>
+  <button class="tab-btn t-mh"             onclick="showTab('mh',this)">✦ MATERIAL HANDLING – Gru & Trasportatori</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div>Full Electric</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div>Bi-Energy / LTH opzionale</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>Solo termico</div>
+</div>
+
+<!-- ========== SCISSOR ========== -->
+<div id="scissor" class="section active">
+  <div class="table-wrapper"><table>
+    <thead><tr>
+      <th class="label-col">Caratteristica</th>
+      <th class="data-col" style="border-bottom:3px solid #e67e22"><span style="color:#e67e22">BIBI 850-BL</span></th>
+      <th class="data-col" style="border-bottom:3px solid #d35400"><span style="color:#d35400">BIBI 870-BL</span></th>
+      <th class="data-col" style="border-bottom:3px solid #8e44ad"><span style="color:#8e44ad">BIBI 1090-BL</span></th>
+      <th class="data-col" style="border-bottom:3px solid #27ae60"><span style="color:#27ae60">BIBI 1090 PRiMO</span></th>
+      <th class="data-col" style="border-bottom:3px solid #2980b9"><span style="color:#2980b9">BIBI 1490 EVO</span></th>
+      <th class="data-col" style="border-bottom:3px solid #1abc9c"><span style="color:#1abc9c">BIBI 1490 PRiMO</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="label-cell">Alt. di lavoro</td><td class="data-cell">7,9 m</td><td class="data-cell">7,9 m</td><td class="data-cell">10,0 m</td><td class="data-cell">10,0 m</td><td class="data-cell">14,0 m</td><td class="data-cell">14,0 m</td></tr>
+      <tr><td class="label-cell">Alt. di traslazione</td><td class="data-cell">6,0 m</td><td class="data-cell">6,0 m</td><td class="data-cell">6,5 m</td><td class="data-cell">6,5 m</td><td class="data-cell">9,2 m</td><td class="data-cell">9,2 m</td></tr>
+      <tr><td class="label-cell">Alt. calpestio</td><td class="data-cell">5,9 m</td><td class="data-cell">5,9 m</td><td class="data-cell">8,0 m</td><td class="data-cell">8,0 m</td><td class="data-cell">12,0 m</td><td class="data-cell">12,0 m</td></tr>
+      <tr><td class="label-cell">Portata navicella</td><td class="data-cell">250 kg (2 op.)</td><td class="data-cell">250 kg (2 op.)</td><td class="data-cell">300 kg (2 op.)</td><td class="data-cell">300 kg (2 op.)</td><td class="data-cell">400 kg (2 op.)</td><td class="data-cell">400 kg (2 op.)</td></tr>
+      <tr><td class="label-cell">Dim. navicella</td><td class="data-cell">1,50 × 0,78 m</td><td class="data-cell">1,50 × 1,20 m</td><td class="data-cell">1,80 × 1,30 m</td><td class="data-cell">1,80 × 1,30 m</td><td class="data-cell">2,32 × 1,57 m</td><td class="data-cell">2,32 × 1,57 m</td></tr>
+      <tr><td class="label-cell">Larghezza</td><td class="data-cell">1,30–1,50 m</td><td class="data-cell">1,30–1,50 m</td><td class="data-cell">1,46–1,64 m</td><td class="data-cell">1,46–1,64 m</td><td class="data-cell">1,69–2,03 m</td><td class="data-cell">1,69–2,03 m</td></tr>
+      <tr><td class="label-cell">Sottocarro</td><td class="data-cell">Bi-Livellante</td><td class="data-cell">Bi-Livellante</td><td class="data-cell">Bi-Livellante</td><td class="data-cell">Bi-Livellante</td><td class="data-cell">Bi-Livellante</td><td class="data-cell">Bi-Livellante</td></tr>
+      <tr><td class="label-cell">Livell. long. ant./post.</td><td class="data-cell">±16° / ±20°</td><td class="data-cell">±16° / ±20°</td><td class="data-cell">±15° / ±20°</td><td class="data-cell">±15° / ±20°</td><td class="data-cell">±15° / ±15°</td><td class="data-cell">±15° / ±15°</td></tr>
+      <tr><td class="label-cell">Livell. laterale</td><td class="data-cell">±15°</td><td class="data-cell">±15°</td><td class="data-cell">±14°</td><td class="data-cell">±14°</td><td class="data-cell">±14°</td><td class="data-cell">±14°</td></tr>
+      <tr><td class="label-cell">Velocità max</td><td class="data-cell">2,20 km/h</td><td class="data-cell">2,20 km/h</td><td class="data-cell">2,40 km/h</td><td class="data-cell">4,50 km/h</td><td class="data-cell">2,50 km/h</td><td class="data-cell">4,00 km/h</td></tr>
+      <tr><td class="label-cell">Pendenza superabile</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td></tr>
+      <tr><td class="label-cell">Alimentazione</td><td class="data-cell">Benzina / Diesel</td><td class="data-cell">Benzina / Diesel / Bi-Energy</td><td class="data-cell">Benzina / Diesel / Bi-Energy</td><td class="data-cell">Full Electric (2 mot.)</td><td class="data-cell">Diesel Yanmar 14 kW</td><td class="data-cell">LTH Power Pack 420Ah-48V</td></tr>
+      <tr><td class="label-cell">Peso totale</td><td class="data-cell">2.070–2.090 kg</td><td class="data-cell">2.500–2.530 kg</td><td class="data-cell">2.860–2.890 kg</td><td class="data-cell">2.880–3.050 kg</td><td class="data-cell">5.250 kg</td><td class="data-cell">5.200 kg</td></tr>
+      <tr><td class="label-cell">Versione elettrica</td>
+        <td class="data-cell red">No</td><td class="data-cell orange">Bi-Energy</td><td class="data-cell orange">Bi-Energy</td>
+        <td class="data-cell green">Full Electric</td><td class="data-cell red">No – Diesel</td><td class="data-cell green">Full Electric</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="cards-title">Riepilogo rapido</div>
+  <div class="cards-grid">
+    <div class="card" style="border-top-color:#e67e22"><div class="card-title" style="color:#e67e22">BIBI 850-BL</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">7,9 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,30–1,50 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val red">No</span></div></div>
+    <div class="card" style="border-top-color:#d35400"><div class="card-title" style="color:#d35400">BIBI 870-BL</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">7,9 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,30–1,50 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val orange">Bi-Energy</span></div></div>
+    <div class="card" style="border-top-color:#8e44ad"><div class="card-title" style="color:#8e44ad">BIBI 1090-BL</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">10,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">300 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,46–1,64 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val orange">Bi-Energy</span></div></div>
+    <div class="card" style="border-top-color:#27ae60"><div class="card-title" style="color:#27ae60">BIBI 1090 PRiMO</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">10,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">300 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,46–1,64 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">Full Electric</span></div></div>
+    <div class="card" style="border-top-color:#2980b9"><div class="card-title" style="color:#2980b9">BIBI 1490 EVO</div><div class="card-subtitle">Diesel · Bi-Levelling</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">14,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">400 kg</span></div><div class="card-row"><span class="lbl">Navicella</span><span class="val">2,32 × 1,57 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val red">No – Diesel</span></div></div>
+    <div class="card" style="border-top-color:#1abc9c"><div class="card-title" style="color:#1abc9c">BIBI 1490 PRiMO</div><div class="card-subtitle">Full Electric · Bi-Levelling</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">14,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">400 kg</span></div><div class="card-row"><span class="lbl">Navicella</span><span class="val">2,32 × 1,57 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">Full Electric</span></div></div>
+  </div>
+</div>
+
+<!-- ========== JIBBI ========== -->
+<div id="boom" class="section">
+  <div class="table-wrapper"><table>
+    <thead><tr>
+      <th class="label-col">Caratteristica</th>
+      <th class="data-col" style="border-bottom:3px solid #2980b9"><span style="color:#2980b9">JIBBI 1250</span></th>
+      <th class="data-col" style="border-bottom:3px solid #16a085"><span style="color:#16a085">JIBBI 1450</span></th>
+      <th class="data-col" style="border-bottom:3px solid #1abc9c"><span style="color:#1abc9c">JIBBI 1670</span></th>
+      <th class="data-col" style="border-bottom:3px solid #e74c3c"><span style="color:#e74c3c">JIBBI 1290 RT</span></th>
+      <th class="data-col" style="border-bottom:3px solid #c0392b"><span style="color:#c0392b">JIBBI 1890 EVO</span></th>
+      <th class="data-col" style="border-bottom:3px solid #27ae60"><span style="color:#27ae60">JIBBI 1890 PRiMO</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="label-cell">Alt. di lavoro</td><td class="data-cell">12,2 m</td><td class="data-cell">14,8 m</td><td class="data-cell">16,0 m</td><td class="data-cell">12,0 m</td><td class="data-cell">17,9 m</td><td class="data-cell">17,9 m</td></tr>
+      <tr><td class="label-cell">Alt. di traslazione</td><td class="data-cell">8,0 m</td><td class="data-cell">7,4 m (230kg) / 9,1 m (140kg)</td><td class="data-cell">9,8 m</td><td class="data-cell">12,0 m</td><td class="data-cell">13,8 m</td><td class="data-cell">13,8 m</td></tr>
+      <tr><td class="label-cell">Alt. calpestio</td><td class="data-cell">10,2 m</td><td class="data-cell">12,8 m</td><td class="data-cell">14,0 m</td><td class="data-cell">9,9 m</td><td class="data-cell">15,9 m</td><td class="data-cell">15,9 m</td></tr>
+      <tr><td class="label-cell">Portata navicella</td><td class="data-cell">230 kg</td><td class="data-cell">230 kg</td><td class="data-cell">230 kg</td><td class="data-cell">250 kg (2 op.)</td><td class="data-cell">250 kg (2 op.)</td><td class="data-cell">250 kg (2 op.)</td></tr>
+      <tr><td class="label-cell">Larghezza min.</td><td class="data-cell">1,15–1,95 m</td><td class="data-cell">1,35–2,45 m</td><td class="data-cell">1,35–2,45 m</td><td class="data-cell">1,98 m</td><td class="data-cell">2,20 m</td><td class="data-cell">2,20 m</td></tr>
+      <tr><td class="label-cell">Livellamento</td><td class="data-cell">Dynamic ±15°</td><td class="data-cell">Dynamic ±15°</td><td class="data-cell">Dynamic ±15°</td><td class="data-cell">Non livellante</td><td class="data-cell">±15,6° long/lat</td><td class="data-cell">±15,6° long/lat</td></tr>
+      <tr><td class="label-cell">Sbraccio (carico min)</td><td class="data-cell">7,0 m (80 kg)</td><td class="data-cell">7,6 m (80 kg)</td><td class="data-cell">8,5 m (80 kg)</td><td class="data-cell">9,2 m (250 kg)</td><td class="data-cell">9,92 m (140 kg)</td><td class="data-cell">9,92 m (140 kg)</td></tr>
+      <tr><td class="label-cell">Sbraccio (carico max)</td><td class="data-cell">5,4 m (230 kg)</td><td class="data-cell">5,9 m (230 kg)</td><td class="data-cell">6,7 m (230 kg)</td><td class="data-cell">9,2 m (250 kg)</td><td class="data-cell">8,32 m (250 kg)</td><td class="data-cell">8,32 m (250 kg)</td></tr>
+      <tr><td class="label-cell">Rotazione torretta</td><td class="data-cell">±110°</td><td class="data-cell">±110°</td><td class="data-cell">±110°</td><td class="data-cell">±190°</td><td class="data-cell">±190°</td><td class="data-cell">±190°</td></tr>
+      <tr><td class="label-cell">Velocità max</td><td class="data-cell">2,5 km/h</td><td class="data-cell">2,5/2,0 km/h</td><td class="data-cell">2,5 km/h</td><td class="data-cell">3,0–3,6 km/h</td><td class="data-cell">3,0 km/h</td><td class="data-cell">4,5 km/h</td></tr>
+      <tr><td class="label-cell">Alimentazione</td><td class="data-cell">Diesel / LTH / ELC</td><td class="data-cell">Diesel Yanmar 12,5kW / LTH</td><td class="data-cell">Diesel / LTH</td><td class="data-cell">Diesel / LTH</td><td class="data-cell">Diesel Yanmar</td><td class="data-cell">Full Electric</td></tr>
+      <tr><td class="label-cell">Peso totale</td><td class="data-cell">2.850–3.600 kg</td><td class="data-cell">2.806–2.870 kg</td><td class="data-cell">3.850–3.910 kg</td><td class="data-cell">~5.860–5.995 kg</td><td class="data-cell">~6.050 kg</td><td class="data-cell">~5.870–6.300 kg</td></tr>
+      <tr><td class="label-cell">Versione elettrica</td>
+        <td class="data-cell green">LTH / ELC</td><td class="data-cell green">LTH</td><td class="data-cell green">LTH</td>
+        <td class="data-cell green">LTH</td><td class="data-cell red">No</td><td class="data-cell green">Full Electric</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="cards-title">Riepilogo rapido</div>
+  <div class="cards-grid">
+    <div class="card" style="border-top-color:#2980b9"><div class="card-title" style="color:#2980b9">JIBBI 1250</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">12,2 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">230 kg</span></div><div class="card-row"><span class="lbl">Larg. min</span><span class="val">1,15 m</span></div><div class="card-row"><span class="lbl">Sbraccio</span><span class="val">7,0 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">LTH/ELC</span></div></div>
+    <div class="card" style="border-top-color:#16a085"><div class="card-title" style="color:#16a085">JIBBI 1450</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">14,8 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">230 kg</span></div><div class="card-row"><span class="lbl">Larg. min</span><span class="val">1,35 m</span></div><div class="card-row"><span class="lbl">Sbraccio</span><span class="val">7,6 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">LTH</span></div></div>
+    <div class="card" style="border-top-color:#1abc9c"><div class="card-title" style="color:#1abc9c">JIBBI 1670</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">16,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">230 kg</span></div><div class="card-row"><span class="lbl">Larg. min</span><span class="val">1,35 m</span></div><div class="card-row"><span class="lbl">Sbraccio</span><span class="val">8,5 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">LTH</span></div></div>
+    <div class="card" style="border-top-color:#e74c3c"><div class="card-title" style="color:#e74c3c">JIBBI 1290 RT</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">12,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,98 m</span></div><div class="card-row"><span class="lbl">Sbraccio</span><span class="val">9,2 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">LTH</span></div></div>
+    <div class="card" style="border-top-color:#c0392b"><div class="card-title" style="color:#c0392b">JIBBI 1890 EVO</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">17,9 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">2,20 m</span></div><div class="card-row"><span class="lbl">Sbraccio</span><span class="val">9,92 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val red">No – Diesel</span></div></div>
+    <div class="card" style="border-top-color:#27ae60"><div class="card-title" style="color:#27ae60">JIBBI 1890 PRiMO</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">17,9 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larghezza</span><span class="val">2,20 m</span></div><div class="card-row"><span class="lbl">Sbraccio</span><span class="val">9,92 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">Full Electric</span></div></div>
+  </div>
+</div>
+
+<!-- ========== BILLENNIUM ========== -->
+<div id="bill" class="section">
+  <!-- Sub-tabs -->
+  <div class="sub-tabs">
+    <button class="sub-tab-btn active" onclick="showSubTab('bill-tele', this)">📡 Telescopici – B1570 Visual / B1890 Quick-Pro</button>
+    <button class="sub-tab-btn"        onclick="showSubTab('bill-arti', this)">🦾 Articolati BA-LINE – B1570-A / B2190-A / B2490-A</button>
+  </div>
+
+  <!-- SUB: Telescopici -->
+  <div id="bill-tele" class="sub-section active">
+    <div class="subsection-header">
+      <span class="type-badge badge-tele">Braccio Telescopico · SpiderBoom</span>
+      <h3>B1570 VISUAL &amp; B1890 QUICK-PRO</h3>
+      <hr>
+    </div>
+    <div class="table-wrapper"><table>
+      <thead><tr>
+        <th class="label-col">Caratteristica</th>
+        <th class="data-col" style="border-bottom:3px solid #e74c3c"><span style="color:#e74c3c">B1570 VISUAL ETS</span></th>
+        <th class="data-col" style="border-bottom:3px solid #c0392b"><span style="color:#c0392b">B1890 QUICK-PRO EVO</span></th>
+        <th class="data-col" style="border-bottom:3px solid #27ae60"><span style="color:#27ae60">B1890 QUICK-PRO LTH</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="label-cell">Tipo braccio</td><td class="data-cell">Telescopico</td><td class="data-cell">Telescopico</td><td class="data-cell">Telescopico</td></tr>
+        <tr><td class="label-cell">Alt. di lavoro</td><td class="data-cell">15,0 m</td><td class="data-cell">18,0 m</td><td class="data-cell">18,0 m</td></tr>
+        <tr><td class="label-cell">Alt. di traslazione</td><td class="data-cell">8,0 m</td><td class="data-cell">9,4 m</td><td class="data-cell">9,4 m</td></tr>
+        <tr><td class="label-cell">Alt. calpestio</td><td class="data-cell">13,0 m</td><td class="data-cell">16,0 m</td><td class="data-cell">16,0 m</td></tr>
+        <tr><td class="label-cell">Portata navicella</td><td class="data-cell">230 kg</td><td class="data-cell">250 kg</td><td class="data-cell">250 kg</td></tr>
+        <tr><td class="label-cell">Dim. navicella</td><td class="data-cell">1,4 × 0,74 m (Tasket)</td><td class="data-cell">1,4 × 0,74 m (opz. 1,8 m)</td><td class="data-cell">1,4 × 0,74 m (opz. 1,8 m)</td></tr>
+        <tr><td class="label-cell">Larghezza min (traslaz.)</td><td class="data-cell">0,79 m</td><td class="data-cell">0,79 m</td><td class="data-cell">0,79 m</td></tr>
+        <tr><td class="label-cell">Larghezza su cingoli (lav.)</td><td class="data-cell">1,39 m</td><td class="data-cell">1,39 m</td><td class="data-cell">1,39 m</td></tr>
+        <tr><td class="label-cell">Livell. longitudinale</td><td class="data-cell">±10°</td><td class="data-cell">±10°</td><td class="data-cell">±10°</td></tr>
+        <tr><td class="label-cell">Livell. laterale</td><td class="data-cell">±5°</td><td class="data-cell">±5°</td><td class="data-cell">±5°</td></tr>
+        <tr><td class="label-cell">SPS (senza stabilizzatori)</td><td class="data-cell">Sì – fino 8,6 m</td><td class="data-cell">Sì – fino 9,4 m</td><td class="data-cell">Sì – fino 9,4 m</td></tr>
+        <tr><td class="label-cell">Sbraccio max (80 kg)</td><td class="data-cell">9,6 m</td><td class="data-cell">10,8 m</td><td class="data-cell">10,8 m</td></tr>
+        <tr><td class="label-cell">Sbraccio max (230/250 kg)</td><td class="data-cell">7,5 m</td><td class="data-cell">8,2 m</td><td class="data-cell">8,2 m</td></tr>
+        <tr><td class="label-cell">Rotazione torretta</td><td class="data-cell">±185°</td><td class="data-cell">±190°</td><td class="data-cell">±190°</td></tr>
+        <tr><td class="label-cell">Area stabilizzazione</td><td class="data-cell">2,48 × 4,09 m</td><td class="data-cell">3,65 × 4,97 m</td><td class="data-cell">3,65 × 4,97 m</td></tr>
+        <tr><td class="label-cell">Sistema stabilizzazione</td><td class="data-cell">Automatica</td><td class="data-cell">Quick-PRO (6 comb.)</td><td class="data-cell">Quick-PRO (6 comb.)</td></tr>
+        <tr><td class="label-cell">Pendenza superabile</td><td class="data-cell">20°</td><td class="data-cell">20°</td><td class="data-cell">20°</td></tr>
+        <tr><td class="label-cell">Velocità max</td><td class="data-cell">2,5 km/h</td><td class="data-cell">2,6 km/h</td><td class="data-cell">2,0 km/h</td></tr>
+        <tr><td class="label-cell">Alimentazione</td><td class="data-cell">Honda iGX390 7,0 kW</td><td class="data-cell">Yanmar 2TNV70 10,2 kW</td><td class="data-cell">Litio 200Ah-48V</td></tr>
+        <tr><td class="label-cell">Peso totale</td><td class="data-cell">~2.617 kg</td><td class="data-cell">~2.940 kg</td><td class="data-cell">~2.940 kg</td></tr>
+        <tr><td class="label-cell">Sistemi inclusi</td><td class="data-cell">ATS · AWP · SPS</td><td class="data-cell">ATS · AWP · SPS · Quick-PRO</td><td class="data-cell">ATS · AWP · SPS · Quick-PRO</td></tr>
+        <tr><td class="label-cell">Versione elettrica</td>
+          <td class="data-cell red">No – Termico</td>
+          <td class="data-cell red">No – Termico</td>
+          <td class="data-cell green">Sì – Litio LTH</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="cards-title">Riepilogo rapido – Telescopici</div>
+    <div class="cards-grid">
+      <div class="card" style="border-top-color:#e74c3c"><div class="card-title" style="color:#e74c3c">B1570 VISUAL ETS</div><div class="card-subtitle">Telescopico · Honda benzina</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">15,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">230 kg</span></div><div class="card-row"><span class="lbl">Larg. traslaz.</span><span class="val">0,79 m</span></div><div class="card-row"><span class="lbl">Sbraccio max</span><span class="val">9,6 m</span></div><div class="card-row"><span class="lbl">SPS senza stab.</span><span class="val green">Sì – 8,6 m</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val red">No</span></div></div>
+      <div class="card" style="border-top-color:#c0392b"><div class="card-title" style="color:#c0392b">B1890 QP EVO</div><div class="card-subtitle">Telescopico · Diesel Yanmar</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">18,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larg. traslaz.</span><span class="val">0,79 m</span></div><div class="card-row"><span class="lbl">Sbraccio max</span><span class="val">10,8 m</span></div><div class="card-row"><span class="lbl">Stabiliz.</span><span class="val">Quick-PRO 6 comb.</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val red">No</span></div></div>
+      <div class="card" style="border-top-color:#27ae60"><div class="card-title" style="color:#27ae60">B1890 QP LTH</div><div class="card-subtitle">Telescopico · Full Electric Litio</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">18,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">250 kg</span></div><div class="card-row"><span class="lbl">Larg. traslaz.</span><span class="val">0,79 m</span></div><div class="card-row"><span class="lbl">Sbraccio max</span><span class="val">10,8 m</span></div><div class="card-row"><span class="lbl">Stabiliz.</span><span class="val">Quick-PRO 6 comb.</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">Sì – Litio 200Ah</span></div></div>
+    </div>
+
+    <div class="section-subtitle">Sistemi tecnologici esclusivi Billennium</div>
+    <div class="adv-grid">
+      <div class="adv-card purple"><h4>SPS – Self-Propelled Skill System</h4><p>Utilizzo senza abbassare gli stabilizzatori, livellando fino a 10°. Altezza max con SPS: 8,6 m (B1570) e 9,4 m (B1890).</p></div>
+      <div class="adv-card purple"><h4>AWP – Adaptive Working Performance</h4><p>Calcola in tempo reale l'area di stabilizzazione misurando l'angolo di ogni stabilizzatore, ottimizzando lo sbraccio fino a +0,5 m.</p></div>
+      <div class="adv-card purple"><h4>ATS – Automatic Tensioner System</h4><p>Tensionamento cingoli idraulico a zero manutenzione, controllato direttamente dall'impianto idraulico principale.</p></div>
+      <div class="adv-card purple"><h4>Quick-PRO (solo B1890)</h4><p>6 combinazioni di posizionamento degli stabilizzatori, selezionabili automaticamente tramite selettore. Interagisce con AWP per massimizzare lo sbraccio.</p></div>
+      <div class="adv-card purple"><h4>Cingoli XXL</h4><p>1,39 m larg. · 2,15 m lung. · 0,47 m alt. I più lunghi e larghi sul mercato per massima stabilità su terreni sconnessi.</p></div>
+      <div class="adv-card purple"><h4>Zero Tail Swing</h4><p>La struttura non fuoriesce dai cingoli durante la rotazione della torretta: ideale per spazi ristretti e cantieri urbani.</p></div>
+    </div>
+  </div>
+
+  <!-- SUB: Articolati BA-LINE -->
+  <div id="bill-arti" class="sub-section">
+    <div class="subsection-header">
+      <span class="type-badge badge-arti">Braccio Articolato · BA-LINE · SpiderLift su cingoli</span>
+      <h3>B1570-A / B2190-A / B2490-A</h3>
+      <hr>
+    </div>
+    <div class="table-wrapper"><table>
+      <thead><tr>
+        <th class="label-col">Caratteristica</th>
+        <th class="data-col" style="border-bottom:3px solid #9b59b6"><span style="color:#9b59b6">B1570-A</span></th>
+        <th class="data-col" style="border-bottom:3px solid #6c3483"><span style="color:#6c3483">B2190-A</span></th>
+        <th class="data-col" style="border-bottom:3px solid #4a235a"><span style="color:#bb8fce">B2490-A</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="label-cell">Tipo braccio</td><td class="data-cell">Articolato</td><td class="data-cell">Articolato</td><td class="data-cell">Articolato</td></tr>
+        <tr><td class="label-cell">Alt. di lavoro</td><td class="data-cell">15,0 m</td><td class="data-cell">20,4 m</td><td class="data-cell">23,5 m</td></tr>
+        <tr><td class="label-cell">Sbraccio max (230 kg)</td><td class="data-cell">6,8 m</td><td class="data-cell">9,8 m</td><td class="data-cell">11,5 m</td></tr>
+        <tr><td class="label-cell">Scavalcamento (up &amp; over)</td><td class="data-cell">6,2 m</td><td class="data-cell">8,8 m</td><td class="data-cell">11,0 m</td></tr>
+        <tr><td class="label-cell">Portata navicella</td><td class="data-cell">230 kg</td><td class="data-cell">230 kg</td><td class="data-cell">230 kg</td></tr>
+        <tr><td class="label-cell">Rotazione cesta</td><td class="data-cell">160°</td><td class="data-cell">160°</td><td class="data-cell">160°</td></tr>
+        <tr><td class="label-cell">Rotazione torretta</td><td class="data-cell">360°</td><td class="data-cell">360°</td><td class="data-cell">440°</td></tr>
+        <tr><td class="label-cell">Stabilizzatori</td><td class="data-cell">Auto-livellanti</td><td class="data-cell">Auto-livellanti</td><td class="data-cell">Geometria variabile (117° / 59°)</td></tr>
+        <tr><td class="label-cell">Larghezza traslazione</td><td class="data-cell">0,705 m</td><td class="data-cell">0,705 m</td><td class="data-cell">0,705 m</td></tr>
+        <tr><td class="label-cell">Pendenza superabile</td><td class="data-cell">30%</td><td class="data-cell">30%</td><td class="data-cell">30%</td></tr>
+        <tr><td class="label-cell">Motore elettrico ausil.</td><td class="data-cell">220V – 2,2 kW</td><td class="data-cell">220V – 2,2 kW</td><td class="data-cell">220V – 2,2 kW</td></tr>
+        <tr><td class="label-cell">Batteria litio inclusa</td><td class="data-cell">48V – 100Ah</td><td class="data-cell">48V – 100Ah</td><td class="data-cell">48V – 100Ah</td></tr>
+        <tr><td class="label-cell">Peso totale</td><td class="data-cell">2.000 kg</td><td class="data-cell">2.850 kg</td><td class="data-cell">3.250 kg</td></tr>
+        <tr><td class="label-cell">Versioni disponibili</td>
+          <td class="data-cell">ETS (benzina/diesel)<br>LTH (litio)</td>
+          <td class="data-cell">EVO (diesel Kubota)<br>LTH (litio 200Ah)<br>Bi-Energy</td>
+          <td class="data-cell">EVO (diesel Kubota)<br>Bi-Energy</td>
+        </tr>
+        <tr><td class="label-cell">Versione elettrica</td>
+          <td class="data-cell green">Sì – LTH Litio</td>
+          <td class="data-cell green">Sì – LTH / Bi-Energy</td>
+          <td class="data-cell orange">Bi-Energy</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="cards-title">Riepilogo rapido – BA-LINE Articolati</div>
+    <div class="cards-grid">
+      <div class="card" style="border-top-color:#9b59b6">
+        <div class="card-title" style="color:#9b59b6">B1570-A</div>
+        <div class="card-subtitle">Articolato · Cingolato</div>
+        <div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">15,0 m</span></div>
+        <div class="card-row"><span class="lbl">Sbraccio</span><span class="val">6,8 m</span></div>
+        <div class="card-row"><span class="lbl">Scavalcamento</span><span class="val">6,2 m</span></div>
+        <div class="card-row"><span class="lbl">Rot. torretta</span><span class="val">360°</span></div>
+        <div class="card-row"><span class="lbl">Larg. traslaz.</span><span class="val">0,705 m</span></div>
+        <div class="card-row"><span class="lbl">Peso</span><span class="val">2.000 kg</span></div>
+        <div class="card-row"><span class="lbl">Elettrica</span><span class="val green">LTH Litio</span></div>
+      </div>
+      <div class="card" style="border-top-color:#6c3483">
+        <div class="card-title" style="color:#6c3483">B2190-A</div>
+        <div class="card-subtitle">Articolato · Cingolato</div>
+        <div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">20,4 m</span></div>
+        <div class="card-row"><span class="lbl">Sbraccio</span><span class="val">9,8 m</span></div>
+        <div class="card-row"><span class="lbl">Scavalcamento</span><span class="val">8,8 m</span></div>
+        <div class="card-row"><span class="lbl">Rot. torretta</span><span class="val">360°</span></div>
+        <div class="card-row"><span class="lbl">Larg. traslaz.</span><span class="val">0,705 m</span></div>
+        <div class="card-row"><span class="lbl">Peso</span><span class="val">2.850 kg</span></div>
+        <div class="card-row"><span class="lbl">Elettrica</span><span class="val green">LTH / Bi-Energy</span></div>
+      </div>
+      <div class="card" style="border-top-color:#bb8fce">
+        <div class="card-title" style="color:#bb8fce">B2490-A</div>
+        <div class="card-subtitle">Articolato · Stab. geometria variabile</div>
+        <div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">23,5 m</span></div>
+        <div class="card-row"><span class="lbl">Sbraccio</span><span class="val">11,5 m</span></div>
+        <div class="card-row"><span class="lbl">Scavalcamento</span><span class="val">11,0 m</span></div>
+        <div class="card-row"><span class="lbl">Rot. torretta</span><span class="val">440°</span></div>
+        <div class="card-row"><span class="lbl">Larg. traslaz.</span><span class="val">0,705 m</span></div>
+        <div class="card-row"><span class="lbl">Peso</span><span class="val">3.250 kg</span></div>
+        <div class="card-row"><span class="lbl">Elettrica</span><span class="val orange">Bi-Energy</span></div>
+      </div>
+    </div>
+
+    <div class="section-subtitle">Caratteristiche distintive BA-LINE</div>
+    <div class="adv-grid">
+      <div class="adv-card purple"><h4>Braccio articolato – massimo scavalcamento</h4><p>A differenza dei telescopici, il braccio articolato garantisce eccezionali capacità di scavalcamento (fino a 11 m sul B2490-A), ideale per lavori sopra ostacoli fissi come tettoie, gronde e strutture sporgenti.</p></div>
+      <div class="adv-card purple"><h4>Rotazione 360°–440°</h4><p>Tutti i modelli offrono rotazione continua della torretta da 360° (B1570-A e B2190-A) a 440° (B2490-A) e rotazione cestello fino a ±90°, per la massima libertà operativa.</p></div>
+      <div class="adv-card purple"><h4>Stabilizzatori a geometria variabile (B2490-A)</h4><p>Configurabili in posizione larga (117°) o stretta (59°), permettono l'utilizzo anche in ambienti con accesso limitato senza rinunciare alle prestazioni.</p></div>
+      <div class="adv-card purple"><h4>Compattezza in traslazione</h4><p>Larghezza in traslazione di soli 705 mm per tutti i modelli, permettendo l'accesso attraverso porte standard e corridoi stretti inaccessibili ad altri tipi di macchine.</p></div>
+      <div class="adv-card purple"><h4>Batteria litio integrata di serie</h4><p>Tutti i modelli includono una batteria al litio 48V-100Ah di serie per l'alimentazione dei comandi elettro-idraulici, indipendentemente dalla motorizzazione principale scelta.</p></div>
+      <div class="adv-card purple"><h4>Motorizzazioni flessibili</h4><p>Disponibili in versione ETS (benzina Honda / Diesel Hatz), EVO (Diesel Kubota Z602), LTH (Full Electric Litio) e Bi-Energy (Diesel + Litio), adattabili a ogni esigenza di cantiere.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== AJ-LINE ========== -->
+<div id="aj" class="section">
+  <div class="table-wrapper"><table>
+    <thead><tr>
+      <th class="label-col">Caratteristica</th>
+      <th class="data-col" style="border-bottom:3px solid #e67e22"><span style="color:#e67e22">AJ 15 ELC</span></th>
+      <th class="data-col" style="border-bottom:3px solid #d35400"><span style="color:#d35400">AJ 17 ELC</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="label-cell">Brand</td><td class="data-cell">AlmacTech</td><td class="data-cell">AlmacTech</td></tr>
+      <tr><td class="label-cell">Tipo macchina</td><td class="data-cell">Articulated Boom Lift su ruote</td><td class="data-cell">Articulated Boom Lift su ruote</td></tr>
+      <tr><td class="label-cell">Alimentazione</td><td class="data-cell">Full Electric AC (zero emissioni)</td><td class="data-cell">Full Electric AC (zero emissioni)</td></tr>
+      <tr><td class="label-cell">Alt. di lavoro</td><td class="data-cell">15,0 m</td><td class="data-cell">17,1 m</td></tr>
+      <tr><td class="label-cell">Alt. calpestio</td><td class="data-cell">13,0 m</td><td class="data-cell">15,1 m</td></tr>
+      <tr><td class="label-cell">Alt. scavalcamento</td><td class="data-cell">6,0 m</td><td class="data-cell">8,07 m</td></tr>
+      <tr><td class="label-cell">Portata navicella</td><td class="data-cell">230 kg (2 op.)</td><td class="data-cell">230 kg (2 op.)</td></tr>
+      <tr><td class="label-cell">Sbraccio laterale max</td><td class="data-cell">9,0 m</td><td class="data-cell">8,9 m</td></tr>
+      <tr><td class="label-cell">Capacità batteria</td><td class="data-cell">48V / 385Ah (tubolare)</td><td class="data-cell">48V / 385Ah (tubolare)</td></tr>
+      <tr><td class="label-cell">Caricabatteria</td><td class="data-cell">48V / 45A</td><td class="data-cell">48V / 45A</td></tr>
+      <tr><td class="label-cell">Velocità max</td><td class="data-cell">5,0 km/h</td><td class="data-cell">5,0 km/h</td></tr>
+      <tr><td class="label-cell">Pendenza max</td><td class="data-cell">25%</td><td class="data-cell">25%</td></tr>
+      <tr><td class="label-cell">Peso totale</td><td class="data-cell">7.720 kg</td><td class="data-cell">8.375 kg</td></tr>
+      <tr><td class="label-cell">Anti-entrapment</td><td class="data-cell green">Di serie</td><td class="data-cell green">Di serie</td></tr>
+      <tr><td class="label-cell">JIB+ rotante (±65°)</td><td class="data-cell orange">Opzionale</td><td class="data-cell orange">Opzionale</td></tr>
+      <tr><td class="label-cell">Anti-collisione</td><td class="data-cell orange">Opzionale</td><td class="data-cell orange">Opzionale</td></tr>
+      <tr><td class="label-cell">Go Home / Wall / Quick Up&Down</td><td class="data-cell green">Di serie</td><td class="data-cell green">Di serie</td></tr>
+      <tr><td class="label-cell">Versione elettrica</td>
+        <td class="data-cell green">Sì – Full Electric AC</td>
+        <td class="data-cell green">Sì – Full Electric AC</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <div class="cards-title">Riepilogo rapido</div>
+  <div class="cards-grid">
+    <div class="card" style="border-top-color:#e67e22"><div class="card-title" style="color:#e67e22">AJ 15 ELC</div><div class="card-subtitle">Articolato su ruote · AlmacTech</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">15,0 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">230 kg</span></div><div class="card-row"><span class="lbl">Sbraccio lat.</span><span class="val">9,0 m</span></div><div class="card-row"><span class="lbl">Scavalcamento</span><span class="val">6,0 m</span></div><div class="card-row"><span class="lbl">Velocità</span><span class="val">5,0 km/h</span></div><div class="card-row"><span class="lbl">Peso</span><span class="val">7.720 kg</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">Full Electric AC</span></div></div>
+    <div class="card" style="border-top-color:#d35400"><div class="card-title" style="color:#d35400">AJ 17 ELC</div><div class="card-subtitle">Articolato su ruote · AlmacTech</div><div class="card-row"><span class="lbl">Alt. lavoro</span><span class="val">17,1 m</span></div><div class="card-row"><span class="lbl">Portata</span><span class="val">230 kg</span></div><div class="card-row"><span class="lbl">Sbraccio lat.</span><span class="val">8,9 m</span></div><div class="card-row"><span class="lbl">Scavalcamento</span><span class="val">8,07 m</span></div><div class="card-row"><span class="lbl">Velocità</span><span class="val">5,0 km/h</span></div><div class="card-row"><span class="lbl">Peso</span><span class="val">8.375 kg</span></div><div class="card-row"><span class="lbl">Elettrica</span><span class="val green">Full Electric AC</span></div></div>
+  </div>
+
+  <div class="section-subtitle">Vantaggi competitivi AJ-LINE</div>
+  <div class="adv-grid">
+    <div class="adv-card"><h4>Batteria 385Ah / 48V – Celle tubolari</h4><p>Cicli operativi più lunghi, meno ricariche e maggiore durata nel tempo rispetto alle batterie standard, garantendo massima produttività.</p></div>
+    <div class="adv-card"><h4>Hydraulic Pot-Holes</h4><p>Protezione idraulica integrata contro le buche che migliora stabilità e sicurezza, in particolare su superfici irregolari.</p></div>
+    <div class="adv-card"><h4>Freno automatico della ralla</h4><p>La rotazione della torretta viene bloccata automaticamente quando la macchina è ferma, prevenendo movimenti accidentali.</p></div>
+    <div class="adv-card"><h4>Struttura Heavy-Duty in acciaio</h4><p>Cover metalliche antiurto proteggono i componenti critici, riducendo il rischio di danni e abbassando i costi di manutenzione.</p></div>
+    <div class="adv-card"><h4>Pannello LED interattivo</h4><p>Feedback visivo in tempo reale sui movimenti consentiti e sugli allarmi (inclinazione/sovraccarico) per gestione immediata e intuitiva.</p></div>
+    <div class="adv-card"><h4>JIB+ Rotante ±65° – Opzionale</h4><p>Rotazione laterale del jib fino a ±65° per posizionamento preciso in aree complesse senza spostare la macchina.</p></div>
+    <div class="adv-card"><h4>Quick Up &amp; Down</h4><p>Apertura e chiusura simultanea della parte aerea tramite joystick proporzionale, riducendo i tempi di setup e ripiegamento.</p></div>
+    <div class="adv-card"><h4>Go Home</h4><p>Con un singolo comando, braccio, torretta, pantografo e jib si ripiegano automaticamente in posizione di trasporto.</p></div>
+    <div class="adv-card"><h4>Wall Function</h4><p>Gestione automatica dell'estensione telescopica per lavori vicino a pareti: blocca jib e cestello per evitare contatti accidentali.</p></div>
+    <div class="adv-card"><h4>Automatic JIB Folding</h4><p>Apertura e chiusura del jib completamente automatica, azionabile dai comandi a terra, migliorando efficienza e sicurezza.</p></div>
+  </div>
+</div>
+
+<!-- ========== MATERIAL HANDLING ========== -->
+<div id="mh" class="section">
+  <div class="sub-tabs">
+    <button class="sub-tab-btn active" onclick="showSubTab('mh-crane',this)">🏗️ Mini Gru – T-CRANE / TJ-CRANE / M-CRANE</button>
+    <button class="sub-tab-btn"        onclick="showSubTab('mh-std',this)">📦 Multi-Loader Standard – 1.5 FX / 3.0 FX / 3.0 RT</button>
+    <button class="sub-tab-btn"        onclick="showSubTab('mh-bl',this)">⚖️ Multi-Loader Autolivellanti – 3.0 BL / 6.0 BL</button>
+  </div>
+
+  <!-- SUB: Mini Cranes -->
+  <div id="mh-crane" class="sub-section active">
+    <div class="subsection-header">
+      <span class="type-badge" style="background:#1a2a1a;color:#58d68d;border:1px solid #2ecc71">Mini Gru Cingolate · Pick &amp; Carry · Self-Levelling</span>
+      <h3>T-CRANE · TJ-CRANE · M-CRANE</h3>
+      <hr>
+    </div>
+    <div class="table-wrapper"><table>
+      <thead><tr>
+        <th class="label-col">Caratteristica</th>
+        <th class="data-col" style="border-bottom:3px solid #e74c3c"><span style="color:#e74c3c">T-CRANE 1060 EVO</span></th>
+        <th class="data-col" style="border-bottom:3px solid #c0392b"><span style="color:#c0392b">T-CRANE 1060 LTH</span></th>
+        <th class="data-col" style="border-bottom:3px solid #e67e22"><span style="color:#e67e22">TJ-CRANE 1060 EVO</span></th>
+        <th class="data-col" style="border-bottom:3px solid #d35400"><span style="color:#d35400">TJ-CRANE 1060 LTH</span></th>
+        <th class="data-col" style="border-bottom:3px solid #27ae60"><span style="color:#27ae60">M-CRANE 1030 RT</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="label-cell">Tipo gru</td><td class="data-cell">Telescopica</td><td class="data-cell">Telescopica</td><td class="data-cell">Telescopica + Jib</td><td class="data-cell">Telescopica + Jib</td><td class="data-cell">Telescopica su carrier</td></tr>
+        <tr><td class="label-cell">Alt. max sollevamento</td><td class="data-cell">7,7 m</td><td class="data-cell">7,7 m</td><td class="data-cell">8,7 m</td><td class="data-cell">8,7 m</td><td class="data-cell">n.d. (braccio corto)</td></tr>
+        <tr><td class="label-cell">Portata max gru</td><td class="data-cell">990 kg × 3,5 m</td><td class="data-cell">990 kg × 3,5 m</td><td class="data-cell">990 kg</td><td class="data-cell">990 kg</td><td class="data-cell">990 kg</td></tr>
+        <tr><td class="label-cell">Pick &amp; carry capacity</td><td class="data-cell">990 kg</td><td class="data-cell">990 kg</td><td class="data-cell">690 kg</td><td class="data-cell">690 kg</td><td class="data-cell">1.500 kg (carrier)</td></tr>
+        <tr><td class="label-cell">Raggio lavoro max</td><td class="data-cell">6,11 m (450 kg)</td><td class="data-cell">6,11 m (450 kg)</td><td class="data-cell">7,1 m (340 kg)</td><td class="data-cell">7,1 m (340 kg)</td><td class="data-cell">~2,7 m (sbraccio var.)</td></tr>
+        <tr><td class="label-cell">Rotazione torretta</td><td class="data-cell">±110°</td><td class="data-cell">±110°</td><td class="data-cell">±110°</td><td class="data-cell">±110°</td><td class="data-cell">n.d.</td></tr>
+        <tr><td class="label-cell">Larghezza min/max</td><td class="data-cell">1,35 / 2,45 m</td><td class="data-cell">1,35 / 2,45 m</td><td class="data-cell">1,35 / 2,45 m</td><td class="data-cell">1,35 / 2,45 m</td><td class="data-cell">0,89 m (fissa)</td></tr>
+        <tr><td class="label-cell">Livell. long. / lat.</td><td class="data-cell">±15° / ±15°</td><td class="data-cell">±15° / ±15°</td><td class="data-cell">±15° / ±15°</td><td class="data-cell">±15° / ±15°</td><td class="data-cell">±22° trs / ±10° gru</td></tr>
+        <tr><td class="label-cell">Pendenza superabile</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">22° (traslazione)</td></tr>
+        <tr><td class="label-cell">Velocità max</td><td class="data-cell">2,5 km/h</td><td class="data-cell">2,5 km/h</td><td class="data-cell">2,5 km/h</td><td class="data-cell">2,5 km/h</td><td class="data-cell">4,2 km/h</td></tr>
+        <tr><td class="label-cell">Cavo verricello</td><td class="data-cell">30 m</td><td class="data-cell">30 m</td><td class="data-cell">30 m</td><td class="data-cell">30 m</td><td class="data-cell">Opzionale</td></tr>
+        <tr><td class="label-cell">Alimentazione</td><td class="data-cell">Diesel Yanmar 17 Hp</td><td class="data-cell">Litio 300Ah-48V</td><td class="data-cell">Diesel Yanmar 17 Hp</td><td class="data-cell">Litio 300Ah-48V</td><td class="data-cell">Full Electric 2×5,3 kW</td></tr>
+        <tr><td class="label-cell">Peso (con zavorra)</td><td class="data-cell">3.850 kg</td><td class="data-cell">3.910 kg</td><td class="data-cell">3.890 kg</td><td class="data-cell">3.950 kg</td><td class="data-cell">2.000 kg</td></tr>
+        <tr><td class="label-cell">Peso (senza zavorra)</td><td class="data-cell">2.850 kg</td><td class="data-cell">2.910 kg</td><td class="data-cell">2.890 kg</td><td class="data-cell">2.950 kg</td><td class="data-cell">–</td></tr>
+        <tr><td class="label-cell">Versione elettrica</td>
+          <td class="data-cell red">No – Diesel</td>
+          <td class="data-cell green">Sì – Litio LTH</td>
+          <td class="data-cell red">No – Diesel</td>
+          <td class="data-cell green">Sì – Litio LTH</td>
+          <td class="data-cell green">Sì – Full Electric</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="cards-title">Riepilogo rapido – Mini Gru</div>
+    <div class="cards-grid">
+      <div class="card" style="border-top-color:#e74c3c">
+        <div class="card-title" style="color:#e74c3c">T-CRANE 1060</div>
+        <div class="card-subtitle">Gru telescopica cingolata · Pick&Carry</div>
+        <div class="card-row"><span class="lbl">Alt. sollevamento</span><span class="val">7,7 m</span></div>
+        <div class="card-row"><span class="lbl">Portata max</span><span class="val">990 kg</span></div>
+        <div class="card-row"><span class="lbl">Raggio max</span><span class="val">6,11 m</span></div>
+        <div class="card-row"><span class="lbl">Self-levelling</span><span class="val green">±15° long/lat</span></div>
+        <div class="card-row"><span class="lbl">Versioni</span><span class="val">EVO (diesel) / LTH</span></div>
+      </div>
+      <div class="card" style="border-top-color:#e67e22">
+        <div class="card-title" style="color:#e67e22">TJ-CRANE 1060</div>
+        <div class="card-subtitle">Gru telescopica + Jib · Pick&Carry</div>
+        <div class="card-row"><span class="lbl">Alt. sollevamento</span><span class="val">8,7 m</span></div>
+        <div class="card-row"><span class="lbl">Portata max</span><span class="val">990 kg</span></div>
+        <div class="card-row"><span class="lbl">Raggio max</span><span class="val">7,1 m</span></div>
+        <div class="card-row"><span class="lbl">Self-levelling</span><span class="val green">±15° long/lat</span></div>
+        <div class="card-row"><span class="lbl">Versioni</span><span class="val">EVO (diesel) / LTH</span></div>
+      </div>
+      <div class="card" style="border-top-color:#27ae60">
+        <div class="card-title" style="color:#27ae60">M-CRANE 1030 RT</div>
+        <div class="card-subtitle">Carrier cingolato + gru telescopica · Full Electric</div>
+        <div class="card-row"><span class="lbl">Portata carrier</span><span class="val">1.500 kg</span></div>
+        <div class="card-row"><span class="lbl">Portata gru</span><span class="val">990 kg</span></div>
+        <div class="card-row"><span class="lbl">Ground clearance</span><span class="val">170 mm (RT)</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">4,2 km/h</span></div>
+        <div class="card-row"><span class="lbl">Versioni</span><span class="val green">Solo Full Electric</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB: Multi-Loader Standard -->
+  <div id="mh-std" class="sub-section">
+    <div class="subsection-header">
+      <span class="type-badge" style="background:#1a1a3a;color:#85c1e9;border:1px solid #2980b9">Carrier Cingolati · Senza Autolivellamento · Full Electric</span>
+      <h3>ML 1.5 FX · ML 3.0 FX · ML 3.0 RT</h3>
+      <hr>
+    </div>
+    <div class="table-wrapper"><table>
+      <thead><tr>
+        <th class="label-col">Caratteristica</th>
+        <th class="data-col" style="border-bottom:3px solid #3498db"><span style="color:#3498db">ML 1.5 FX</span></th>
+        <th class="data-col" style="border-bottom:3px solid #2980b9"><span style="color:#2980b9">ML 3.0 FX</span></th>
+        <th class="data-col" style="border-bottom:3px solid #1a5276"><span style="color:#85c1e9">ML 3.0 RT</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="label-cell">Tipo</td><td class="data-cell">Mini trasportatore piatto</td><td class="data-cell">Trasportatore pianale</td><td class="data-cell">Trasportatore rough terrain</td></tr>
+        <tr><td class="label-cell">Portata max</td><td class="data-cell">1.500 kg</td><td class="data-cell">3.000 kg (&lt;25°)</td><td class="data-cell">3.000 kg (&lt;25°)</td></tr>
+        <tr><td class="label-cell">Portata su max inclinazione</td><td class="data-cell">n.d.</td><td class="data-cell">2.500 kg</td><td class="data-cell">2.000 kg</td></tr>
+        <tr><td class="label-cell">Autolivellamento</td><td class="data-cell red">No</td><td class="data-cell red">No</td><td class="data-cell red">No</td></tr>
+        <tr><td class="label-cell">Inclinazione long. max</td><td class="data-cell">45°</td><td class="data-cell">45°</td><td class="data-cell">40°</td></tr>
+        <tr><td class="label-cell">Inclinazione laterale max</td><td class="data-cell">30°</td><td class="data-cell">30°</td><td class="data-cell">25°</td></tr>
+        <tr><td class="label-cell">Larghezza</td><td class="data-cell">700 mm</td><td class="data-cell">790 mm</td><td class="data-cell">890 mm</td></tr>
+        <tr><td class="label-cell">Lunghezza</td><td class="data-cell">1.170 mm</td><td class="data-cell">1.780 mm</td><td class="data-cell">1.860 mm</td></tr>
+        <tr><td class="label-cell">Alt. piano di carico</td><td class="data-cell">500 mm</td><td class="data-cell">540 mm</td><td class="data-cell">720 mm</td></tr>
+        <tr><td class="label-cell">Ground clearance</td><td class="data-cell">40 mm</td><td class="data-cell">40 mm</td><td class="data-cell">220 mm</td></tr>
+        <tr><td class="label-cell">Velocità max</td><td class="data-cell">2,8 km/h</td><td class="data-cell">4,2 km/h</td><td class="data-cell">4,2 km/h</td></tr>
+        <tr><td class="label-cell">Pianale girevole</td><td class="data-cell red">No</td><td class="data-cell green">Sì (15 posizioni)</td><td class="data-cell green">Sì (15 posizioni)</td></tr>
+        <tr><td class="label-cell">Supporti estensibili</td><td class="data-cell red">No</td><td class="data-cell green">Sì</td><td class="data-cell green">Sì</td></tr>
+        <tr><td class="label-cell">Alimentazione</td><td class="data-cell">Full Electric 10,6 kW / 48V AGM 55Ah</td><td class="data-cell">Full Electric 2×5,3 kW / 48V (AGM o LTH)</td><td class="data-cell">Full Electric 2×5,3 kW / 48V (AGM o LTH)</td></tr>
+        <tr><td class="label-cell">Protezione IP</td><td class="data-cell">—</td><td class="data-cell">IP67</td><td class="data-cell">IP67</td></tr>
+        <tr><td class="label-cell">Peso totale</td><td class="data-cell">465 kg</td><td class="data-cell">ELC 790 kg / LTH 720 kg</td><td class="data-cell">ELC 975 kg / LTH 805 kg</td></tr>
+        <tr><td class="label-cell">Note distintive</td><td class="data-cell">Compattissimo, accesso porte standard</td><td class="data-cell">Pacco batterie rimovibile</td><td class="data-cell">Ground clearance 220 mm per terreni accidentati</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="cards-title">Riepilogo rapido – Multi-Loader Standard</div>
+    <div class="cards-grid">
+      <div class="card" style="border-top-color:#3498db">
+        <div class="card-title" style="color:#3498db">ML 1.5 FX</div>
+        <div class="card-subtitle">Mini carrier · Full Electric · No levelling</div>
+        <div class="card-row"><span class="lbl">Portata</span><span class="val">1.500 kg</span></div>
+        <div class="card-row"><span class="lbl">Larghezza</span><span class="val">700 mm</span></div>
+        <div class="card-row"><span class="lbl">Lunghezza</span><span class="val">1.170 mm</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">2,8 km/h</span></div>
+        <div class="card-row"><span class="lbl">Peso</span><span class="val">465 kg</span></div>
+      </div>
+      <div class="card" style="border-top-color:#2980b9">
+        <div class="card-title" style="color:#2980b9">ML 3.0 FX</div>
+        <div class="card-subtitle">Carrier pianale · Full Electric · No levelling</div>
+        <div class="card-row"><span class="lbl">Portata</span><span class="val">3.000 kg</span></div>
+        <div class="card-row"><span class="lbl">Larghezza</span><span class="val">790 mm</span></div>
+        <div class="card-row"><span class="lbl">Pianale girevole</span><span class="val green">Sì (15 pos.)</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">4,2 km/h</span></div>
+        <div class="card-row"><span class="lbl">Peso ELC/LTH</span><span class="val">790 / 720 kg</span></div>
+      </div>
+      <div class="card" style="border-top-color:#85c1e9">
+        <div class="card-title" style="color:#85c1e9">ML 3.0 RT</div>
+        <div class="card-subtitle">Rough Terrain · Full Electric · No levelling</div>
+        <div class="card-row"><span class="lbl">Portata</span><span class="val">3.000 kg</span></div>
+        <div class="card-row"><span class="lbl">Larghezza</span><span class="val">890 mm</span></div>
+        <div class="card-row"><span class="lbl">Ground clear.</span><span class="val">220 mm</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">4,2 km/h</span></div>
+        <div class="card-row"><span class="lbl">Peso ELC/LTH</span><span class="val">975 / 805 kg</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB: Multi-Loader BL Self-Levelling -->
+  <div id="mh-bl" class="sub-section">
+    <div class="subsection-header">
+      <span class="type-badge" style="background:#1a3a1a;color:#58d68d;border:1px solid #27ae60">Carrier Cingolati · Autolivellanti · Full Electric · ATS</span>
+      <h3>ML 3.0 BL · ML 6.0 BL · ML 6.0 BL + Crane</h3>
+      <hr>
+    </div>
+    <div class="table-wrapper"><table>
+      <thead><tr>
+        <th class="label-col">Caratteristica</th>
+        <th class="data-col" style="border-bottom:3px solid #27ae60"><span style="color:#27ae60">ML 3.0 BL ELC</span></th>
+        <th class="data-col" style="border-bottom:3px solid #1e8449"><span style="color:#58d68d">ML 3.0 BL LTH</span></th>
+        <th class="data-col" style="border-bottom:3px solid #2ecc71"><span style="color:#2ecc71">ML 6.0 BL ELC</span></th>
+        <th class="data-col" style="border-bottom:3px solid #1abc9c"><span style="color:#1abc9c">ML 6.0 BL LTH</span></th>
+        <th class="data-col" style="border-bottom:3px solid #f39c12"><span style="color:#f39c12">ML 6.0 BL + Crane</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="label-cell">Portata max</td><td class="data-cell">3.000 kg</td><td class="data-cell">3.000 kg</td><td class="data-cell">6.000 kg</td><td class="data-cell">6.000 kg</td><td class="data-cell">5.500 kg (+ gru 990 kg)</td></tr>
+        <tr><td class="label-cell">Autolivellamento</td><td class="data-cell green">Sì – Dynamic</td><td class="data-cell green">Sì – Dynamic</td><td class="data-cell green">Sì – Dynamic</td><td class="data-cell green">Sì – Dynamic</td><td class="data-cell green">Sì – Dynamic</td></tr>
+        <tr><td class="label-cell">Livell. long. ant. / post.</td><td class="data-cell">20° / 15°</td><td class="data-cell">20° / 15°</td><td class="data-cell">20° / 15°</td><td class="data-cell">20° / 15°</td><td class="data-cell">20° / 15°</td></tr>
+        <tr><td class="label-cell">Livell. laterale</td><td class="data-cell">±14°</td><td class="data-cell">±14°</td><td class="data-cell">±13°</td><td class="data-cell">±13°</td><td class="data-cell">±13°</td></tr>
+        <tr><td class="label-cell">Larghezza min / max</td><td class="data-cell">1,46 / 1,64 m</td><td class="data-cell">1,46 / 1,64 m</td><td class="data-cell">1,50 / 1,80 m</td><td class="data-cell">1,50 / 1,80 m</td><td class="data-cell">1,50 / 1,80 m</td></tr>
+        <tr><td class="label-cell">Lunghezza</td><td class="data-cell">2,40 m</td><td class="data-cell">2,40 m</td><td class="data-cell">2,45 m</td><td class="data-cell">2,45 m</td><td class="data-cell">2,66 m (con crane)</td></tr>
+        <tr><td class="label-cell">Altezza minima</td><td class="data-cell">0,74 m</td><td class="data-cell">0,74 m</td><td class="data-cell">0,89 m</td><td class="data-cell">0,89 m</td><td class="data-cell">2,64 m (con crane)</td></tr>
+        <tr><td class="label-cell">Pendenza superabile</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td><td class="data-cell">25°</td></tr>
+        <tr><td class="label-cell">Velocità max</td><td class="data-cell">4,2 km/h</td><td class="data-cell">4,2 km/h</td><td class="data-cell">3,6 km/h</td><td class="data-cell">3,6 km/h</td><td class="data-cell">3,6 km/h</td></tr>
+        <tr><td class="label-cell">Motori elettrici</td><td class="data-cell">2 × 5,3 kW / 48V</td><td class="data-cell">2 × 5,3 kW / 48V</td><td class="data-cell">2 × 7,5 kW / 48V</td><td class="data-cell">2 × 7,5 kW / 48V</td><td class="data-cell">2 × 7,5 kW / 48V</td></tr>
+        <tr><td class="label-cell">Batteria</td><td class="data-cell">Lead Crystal 180Ah-48V</td><td class="data-cell">Litio 210Ah-48V</td><td class="data-cell">Lead Crystal 8×250Ah-48V</td><td class="data-cell">Litio 285Ah-48V</td><td class="data-cell">ELC o LTH</td></tr>
+        <tr><td class="label-cell">Protezione IP</td><td class="data-cell">IP67</td><td class="data-cell">IP67</td><td class="data-cell">IP67</td><td class="data-cell">IP67</td><td class="data-cell">IP67</td></tr>
+        <tr><td class="label-cell">ATS (tensionamento cingoli)</td><td class="data-cell green">Sì</td><td class="data-cell green">Sì</td><td class="data-cell green">Sì</td><td class="data-cell green">Sì</td><td class="data-cell green">Sì</td></tr>
+        <tr><td class="label-cell">Peso totale</td><td class="data-cell">1.855 kg</td><td class="data-cell">1.670 kg</td><td class="data-cell">2.380 kg</td><td class="data-cell">2.360 kg</td><td class="data-cell">2.880 / 2.860 kg</td></tr>
+        <tr><td class="label-cell">Crane kit (portata gru)</td><td class="data-cell red">Non disponibile</td><td class="data-cell red">Non disponibile</td><td class="data-cell orange">Opzionale – 990 kg</td><td class="data-cell orange">Opzionale – 990 kg</td><td class="data-cell green">Incluso – 990 kg</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="cards-title">Riepilogo rapido – Multi-Loader BL Autolivellanti</div>
+    <div class="cards-grid">
+      <div class="card" style="border-top-color:#27ae60">
+        <div class="card-title" style="color:#27ae60">ML 3.0 BL</div>
+        <div class="card-subtitle">Carrier autolivellante · Full Electric · ATS</div>
+        <div class="card-row"><span class="lbl">Portata</span><span class="val">3.000 kg</span></div>
+        <div class="card-row"><span class="lbl">Livell. long/lat</span><span class="val green">20° / ±14°</span></div>
+        <div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,46–1,64 m</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">4,2 km/h</span></div>
+        <div class="card-row"><span class="lbl">Peso ELC/LTH</span><span class="val">1.855 / 1.670 kg</span></div>
+        <div class="card-row"><span class="lbl">Crane kit</span><span class="val red">No</span></div>
+      </div>
+      <div class="card" style="border-top-color:#2ecc71">
+        <div class="card-title" style="color:#2ecc71">ML 6.0 BL</div>
+        <div class="card-subtitle">Carrier autolivellante · Full Electric · ATS</div>
+        <div class="card-row"><span class="lbl">Portata</span><span class="val">6.000 kg</span></div>
+        <div class="card-row"><span class="lbl">Livell. long/lat</span><span class="val green">20° / ±13°</span></div>
+        <div class="card-row"><span class="lbl">Larghezza</span><span class="val">1,50–1,80 m</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">3,6 km/h</span></div>
+        <div class="card-row"><span class="lbl">Peso ELC/LTH</span><span class="val">2.380 / 2.360 kg</span></div>
+        <div class="card-row"><span class="lbl">Crane kit</span><span class="val orange">Opzionale – 990 kg</span></div>
+      </div>
+      <div class="card" style="border-top-color:#f39c12">
+        <div class="card-title" style="color:#f39c12">ML 6.0 BL + Crane</div>
+        <div class="card-subtitle">Carrier + gru autolivellante · Full Electric</div>
+        <div class="card-row"><span class="lbl">Portata carrier</span><span class="val">5.500 kg</span></div>
+        <div class="card-row"><span class="lbl">Portata gru</span><span class="val green">990 kg</span></div>
+        <div class="card-row"><span class="lbl">Livell. long/lat</span><span class="val green">20° / ±13°</span></div>
+        <div class="card-row"><span class="lbl">Velocità max</span><span class="val">3,6 km/h</span></div>
+        <div class="card-row"><span class="lbl">Peso tot.</span><span class="val">~2.880 kg</span></div>
+        <div class="card-row"><span class="lbl">Crane kit</span><span class="val green">Incluso (rimovibile)</span></div>
+      </div>
+    </div>
+
+    <div class="section-subtitle">Differenze chiave: BL vs Standard</div>
+    <div class="adv-grid">
+      <div class="adv-card" style="border-left-color:#27ae60"><h4 style="color:#2ecc71">Dynamic Self-Levelling (BL)</h4><p>I modelli BL si autolivellano dinamicamente fino a 20° longitudinalmente e 13-14° lateralmente durante la traslazione, mantenendo il carico perfettamente orizzontale anche su rampe e pendii.</p></div>
+      <div class="adv-card" style="border-left-color:#27ae60"><h4 style="color:#2ecc71">ATS – Automatic Tensioner System</h4><p>Tensionamento automatico dei cingoli a zero manutenzione, direttamente collegato all'impianto idraulico principale. Garantisce costante aderenza su ogni tipo di terreno.</p></div>
+      <div class="adv-card" style="border-left-color:#27ae60"><h4 style="color:#2ecc71">Struttura più grande, uso professionale</h4><p>I modelli BL hanno dimensioni e pesi superiori (fino a 6.000 kg di portata) rispetto agli FX/RT, pensati per movimentazioni industriali pesanti in cantieri complessi.</p></div>
+      <div class="adv-card" style="border-left-color:#3498db"><h4 style="color:#85c1e9">Standard FX/RT – Compattezza e semplicità</h4><p>I modelli FX e RT non hanno l'autolivellamento ma sono più compatti (da 700 mm di larghezza per l'ML 1.5 FX), più leggeri e indicati per applicazioni in spazi ristretti o dove la pendenza è limitata.</p></div>
+      <div class="adv-card" style="border-left-color:#3498db"><h4 style="color:#85c1e9">ML 3.0 RT – Rough Terrain</h4><p>Ground clearance di 220 mm (vs 40 mm dell'FX), inclinazione laterale max 25°: progettato specificamente per terreni sconnessi, fangosi o con ostacoli che richiedono maggiore altezza da terra.</p></div>
+      <div class="adv-card" style="border-left-color:#f39c12"><h4 style="color:#f39c12">ML 6.0 BL + Crane – Massima versatilità</h4><p>Combinazione unica di carrier autolivellante da 6 tonnellate con gru telescopica da 990 kg rimovibile. Una sola macchina per trasporto pesante e sollevamento in quota, con un unico radiocomando.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Tutti i dati sono tratti dalle schede tecniche ufficiali AlmaCrawler / AlmacTech · I valori non sono vincolanti</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function showSubTab(id, btn) {
+  document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
